@@ -8,6 +8,7 @@ export interface RaceModelContext {
     getDriver?: (response: DriverResponse) => DriverModel;
     saveRace?: (model: RaceModel) => Promise<boolean>;
     getPrediction?: (response: PredictionResponse) => PredictionModel;
+    refresh?:(race:RaceModel)=>Promise<void>;
 }
 
 export class RaceModel {
@@ -23,7 +24,7 @@ export class RaceModel {
     cutoff?: string;
     predictions: PredictionModel[];
     imageUrl:string;
-
+    info:string;
 
     constructor(race: RaceResponse, context?: RaceModelContext) {
         this.raceResponse = race;
@@ -54,6 +55,10 @@ export class RaceModel {
         
     }
 
+    refresh():Promise<void>{
+        return this._context.refresh(this);
+    }
+
     save(): Promise<boolean> {
         if (!this._context || !this._context.saveRace) {
             return Promise.reject(new Error("Need valid context to save"));
@@ -73,7 +78,8 @@ export class RaceModel {
             displayName: this.raceResponse.displayName,
             winner: this.winner ? this.winner.json : null,
             predictions: this.predictions.map(p => p.json),
-            imageUrl:""
+            imageUrl:"",
+            info: this.info
         };
         return raceResponse;
     }
@@ -92,4 +98,5 @@ export interface RaceResponse {
     winner?: DriverResponse;
     predictions: PredictionResponse[];
     imageUrl:string;
+    info:string;
 }
